@@ -1,32 +1,40 @@
-import prismaClient from '../lib/prisma';
-import { hashPassword } from '../lib/auth.js';
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 async function main() {
-  await prismaClient.note.deleteMany();
-  await prismaClient.user.deleteMany();
-  await prismaClient.tenant.deleteMany();
+  console.log("🌱 Seeding database...");
 
-  const acme = await prismaClient.tenant.create({
-    data: { name: 'Acme', slug: 'acme', plan: 'free' }
-  });
-
-  const globex = await prismaClient.tenant.create({
-    data: { name: 'Globex', slug: 'globex', plan: 'free' }
-  });
-
-  const pwd = await hashPassword('password');
-
-  await prismaClient.user.createMany({
+  // --- Tenants ---
+  await prisma.tenant.createMany({
     data: [
-      { email: 'admin@acme.test', password: pwd, role: 'admin', tenantId: acme.id },
-      { email: 'user@acme.test',  password: pwd, role: 'member', tenantId: acme.id },
-      { email: 'admin@globex.test', password: pwd, role: 'admin', tenantId: globex.id },
-      { email: 'user@globex.test',  password: pwd, role: 'member', tenantId: globex.id }
-    ]
+      { name: "Acme Corp", slug: "acme", plan: "FREE" },
+      { name: "Globex Inc", slug: "globex", plan: "FREE" },
+    ],
   });
 
-  console.log('Seeded tenants and users (password: password)');
+  // Fetch tenant IDs
+  const acme = await prisma.tenant.findUnique({ where: { slug: "acme" } });
+  const globex = await prisma.tenant.findUnique({ where: { slug: "globex" } });
+
+  // --- Users ---
+  await prisma.user.createMany({
+    data: [
+      { email: "admin@acme.test", password: "password", role: "ADMIN", tenantId: acme.id },
+      { email: "user@acme.test", password: "password", role: "MEMBER", tenantId: acme.id },
+      { email: "admin@globex.test", password: "password", role: "ADMIN", tenantId: globex.id },
+      { email: "user@globex.test", password: "password", role: "MEMBER", tenantId: globex.id },
+    ],
+  });
+
+  console.log("✅ Seeding finished");
 }
+
 main()
-  .catch(e => { console.error(e); process.exit(1); })
-  .finally(async () => { await prismaClient.$disconnect(); });
+  .catch((e) => {
+    console.error("❌ Seed error:", e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

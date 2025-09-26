@@ -1,39 +1,38 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 model Tenant {
-  id    Int    @id @default(autoincrement())
-  name  String
-  slug  String @unique
-  plan  String @default("free") // "free" or "pro"
-  users User[]
-  notes Note[]
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  slug   String  @unique
+  plan   String  @default("FREE")
+  users  User[]
+  notes  Note[]
 }
 
 model User {
-  id        Int    @id @default(autoincrement())
-  email     String @unique
-  password  String
-  role      String // "admin" or "member"
-  tenantId  Int
-  tenant    Tenant @relation(fields: [tenantId], references: [id])
-  notes     Note[]
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
+  password String
+  role     String
+  tenantId String   @db.ObjectId
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  notes    Note[]
 }
 
 model Note {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   content   String
-  tenantId  Int
+  tenantId  String   @db.ObjectId
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  authorId  Int
-  author    User     @relation(fields: [authorId], references: [id])
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

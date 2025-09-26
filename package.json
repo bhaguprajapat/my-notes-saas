@@ -15,5 +15,8 @@
     "prisma": "^6.16.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
