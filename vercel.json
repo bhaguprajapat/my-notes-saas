@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/notes/:path*", "destination": "/api/notes/:path*" },
+    { "source": "/tenants/:slug/upgrade", "destination": "/api/tenants/:slug/upgrade" },
+    { "source": "/tenants/:slug/invite", "destination": "/api/tenants/:slug/invite" },
+    { "source": "/tenants/:slug", "destination": "/api/tenants/:slug" },
+    { "source": "/auth/login", "destination": "/api/auth/login" }
+  ]
+}

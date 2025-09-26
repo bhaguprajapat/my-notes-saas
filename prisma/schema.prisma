@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id    Int    @id @default(autoincrement())
+  name  String
+  slug  String @unique
+  plan  String @default("free") // "free" or "pro"
+  users User[]
+  notes Note[]
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  email     String @unique
+  password  String
+  role      String // "admin" or "member"
+  tenantId  Int
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  notes     Note[]
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  tenantId  Int
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
